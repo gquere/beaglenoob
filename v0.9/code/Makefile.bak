@@ -1,0 +1,28 @@
+CC=gcc
+CFLAGS=-I.
+IDIR=../include
+LDIR=../lib
+ODIR=obj
+_DEPS = pwm.h lcd.h gpio.h useful.h
+DEPS = $(patsubst %,$(DIR)/%,$(_DEPS))
+
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+demo_lcd: demo_lcd.o gpio.o lcd.o useful.o
+	gcc -o demo_lcd demo_lcd.o gpio.o lcd.o useful.o  -I.
+
+gpio_interrupt: gpio_interrupt.o gpio.o useful.o
+	gcc -o gpio_interrupt gpio_interrupt.o gpio.o useful.o -I.
+
+ir_read: ir_read.o gpio.o useful.o
+	gcc -o ir_read ir_read.o gpio.o useful.o -I.
+
+ir: ir.o gpio.o useful.o
+	gcc -o ir ir.o gpio.o useful.o -I.
+
+thermistor: thermistor.o gpio.o useful.o
+	gcc -o thermistor thermistor.o gpio.o useful.o -I. -lm
+
+starwars_light: starwars_light.o pwm.o
+	gcc -o starwars_light starwars_light.o pwm.o -I.

@@ -1,0 +1,28 @@
+IDIR =../include
+CC=gcc
+CFLAGS=-I$(IDIR)
+
+CFILES=$(shell ls *.c)
+OFILES=$(CFILES:.c=.o)
+
+LIBS=-lm
+
+
+default : beagle.a
+
+debug :
+	@echo "OFILES='$(OFILES)'"
+
+%.o: %.c 
+	$(CC) -c -o  $@ $< $(CFLAGS) 
+
+beagle.a : $(OFILES)
+	ar 
+
+demo_lcd: $(OBJ)
+	gcc -o $@ $^ $(CFLAGS) 
+
+.PHONY: clean
+
+clean:
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ 

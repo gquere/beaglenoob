@@ -1,0 +1,176 @@
+/*
+These functions are used to manipulate the sysfs GPIO interface.
+Sometimes, using the libc fopen(3), fprintf(3) doesn't work, therefore some of 
+the file accesses use open(2), read(2).
+The basics of it are explained in the gpio.txt kernel documentation, which you can
+find on your filesystem () or here http://projects.qi-hardware.com/index.php/p/qi-kernel/source/tree/jz-2.6.35/Documentation/gpio.txt
+Also, a very similar gpio library (which I discovered while I had implemented most of this one)
+has been coded by RidgeRun a few days before me, and is probably of better quality !
+*/
+
+#include "gpio.h"
+
+/*
+To init a GPIO pin, export the pin number to the export file, then set the direction
+of the pin created in the appropriate folder.
+*/
+void gpio_init(int pin, int direction)
+{
+    FILE *gpio_export;
+    int fd_gpio_direction;
+    char path[50] = "/sys/class/gpio/gpio";
+    char gpio_index[3];
+    
+    gpio_export = fopen("/sys/class/gpio/export", "w");
+    if(gpio_export == NULL)
+        {
+        printf("Failed to open export\n");
+        exit(1);
+        }
+    fprintf(gpio_export, "%d", pin);
+    fclose(gpio_export);
+    
+    itoa(pin, gpio_index, 10);
+    strcat(path, gpio_index);
+    strcat(path, "/direction");
+    
+    fd_gpio_direction = open(path, O_WRONLY);
+    if(fd_gpio_direction < 0)
+        {
+        printf("Failed to open gpio %d direction, path %s\n", pin, path);
+        exit(1);
+        }
+    if(direction == 1) 
+        {
+        if(write(fd_gpio_direction, "out", 3*sizeof(char)) != 3*sizeof(char))
+	    {
+	    printf("failed writing to direction\n");
+	    exit(1);
+	    }
+        printf("created gpio %d out\n", pin);
+        }
+    else if (direction == 0)
+        {
+        if(write(fd_gpio_direction, "in", 2*sizeof(char)) != 2*sizeof(char))
+	    {
+	    printf("failed writing to direction\n");
+	    exit(1);
+	    }
+        printf("created gpio %d in\n", pin);
+        }
+    else
+        {
+        printf("Argument failure in gpio_init\n");
+        exit(1);
+        }
+    close(fd_gpio_direction);
+}
+
+/*
+Writing to a GPIO pin is just a matter of writing to the value file of the pin
+*/
+void gpio_write(int pin, int value)
+{
+    FILE *gpio_value;
+    char path[50] = "/sys/class/gpio/gpio";
+    char gpio_index[3];
+    
+    itoa(pin, gpio_index, 10);
+    strcat(path, gpio_index);
+    strcat(path, "/value");
+    
+    gpio_value = fopen(path, "w");
+    if(gpio_value == NULL)
+        {
+        printf("Failed to open gpio %d value\n", pin);
+        exit(1);
+        }
+    if(fprintf(gpio_value, "%d", value) < -1)
+        {
+        printf("Failed writing to gpio %d \n", pin);
+        exit(1);
+        }
+    
+    fclose(gpio_value);
+}
+
+/*
+The libc(3) functions didn't work here, so we need to go deeper and use the system calls
+open(2) and read(2). The file is opened with reading permissions (S_IREAD).
+*/
+int gpio_read(unsigned int pin)
+{   
+    int gpio_value, retval;
+    char value[64];
+    char path[50] = "/sys/class/gpio/gpio";
+    char gpio_index[3];
+    
+    itoa(pin, gpio_index, 10);
+    strcat(path, gpio_index);
+    strcat(path, "/value");
+    
+    gpio_value = open(path, O_RDONLY, S_IREAD);
+    if(gpio_value < 0)
+        {
+        printf("Couldn't open /sys/class/gpio/gpiox/value");
+        exit(1);
+        }
+
+    if(read(gpio_value, value, 64) == -1)
+        {
+	printf("Couldn't read from /sys/class/gpio/gpiox/value\n");
+	exit(1);
+	}
+    close(gpio_value);
+    retval = atoi(value);
+    return retval;
+}
+
+/*
+Set the edge file of the GPIO in order to use interrupts. 
+*/
+void gpio_set_edge(unsigned int pin, char *edge)
+{
+    int fd;
+    char path[50] = "/sys/class/gpio/gpio";
+    char gpio_index[3];
+    
+    itoa(pin, gpio_index, 10);
+    strcat(path, gpio_index);
+    strcat(path, "/edge");
+    
+    fd = open(path, O_WRONLY);
+    if(fd < 0)
+        {
+        printf("Failed to open gpio %d edge\n", pin);
+        exit(1);
+        }
+    write(fd, edge, strlen(edge)+1);
+    close(fd);
+}
+
+/*
+Some programs need to keep a file opened, particularly pins under interrupts,
+therefore this function is based on a file descriptor only which is not closed
+until the end of the program.
+*/
+int gpio_open_fd(unsigned int pin)
+{
+    int fd;
+    char path[50] = "/sys/class/gpio/gpio";
+    char gpio_index[3];
+    
+    itoa(pin, gpio_index, 10);
+    strcat(path, gpio_index);
+    strcat(path, "/value");
+    
+    fd = open(path, O_RDONLY | O_NONBLOCK);
+    if(fd < 0)
+        {
+        printf("Failed to open gpio %d fd\n", pin);
+        exit(1);
+        }
+    return fd;
+}
+
+
