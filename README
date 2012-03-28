@@ -1,2 +1,9 @@
 Please read the Guillaume_Quéré_Documentation.pdf file
-It contains description of the programs included
+It contains themas and description of the programs included
+The subjects treated :
+A/D conversion
+GPIO
+PWM
+Interrupts
+Webserver
+CGI scripts
