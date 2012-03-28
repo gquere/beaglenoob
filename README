@@ -11,3 +11,5 @@ Interrupts
 Webserver + camera
 CGI scripts
 
+/!\ DISCLAIMER : no one has -at any point in time- ever reviewed my code(*). Therefore, it's probably of bad quality. I'm very open to suggestions of ways I could improve !
+(*) I studied aerodynamics for 4 years before switching to embedded systems (almost 2 years experience, mostly AVR/PIC)
