@@ -1,3 +1,6 @@
+27/03 : Sources of the LaTeX documentation
+v0.9 : Actual code
+
 Please read the Guillaume_Quéré_Documentation.pdf file
 It contains themas and description of the programs included
 The subjects treated :
@@ -7,3 +10,4 @@ PWM
 Interrupts
 Webserver + camera
 CGI scripts
+
