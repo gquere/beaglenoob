@@ -5,5 +5,5 @@ A/D conversion
 GPIO
 PWM
 Interrupts
-Webserver
+Webserver + camera
 CGI scripts
