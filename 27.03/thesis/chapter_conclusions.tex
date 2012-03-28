@@ -1,0 +1,12 @@
+\chapter{Conclusion: Linux on ARM vs other RISC architectures }
+
+It is quite clear that beyond the similarities of the architecture (PWM, timers, interrupts), microcontrollers (PIC, AVR) and microprocessors (typically ARM) serve a different purpose. A microcontroller, though some can embed an tiny C OS, is a very simple machine, whereas ARMs are much more complex and can run a real OS, namely the Linux kernel.
+\\
+\\
+The range of use of an ARM easily covers that of the microcontroller and extends it with powerful features such as the use of a camera. But doing the simplest of things such as blinking a LED at a very precise frequency can easily become an impossible to fulfill task in the user-space, and requires coding in the kernel. Developing in the kernel is a much tougher challenge and requires very advanced knowledge of the environment. A wild pointer would likely crash the system, and the try/fail/try/succeed approach would be very time consuming.
+Therefore, appropriate considerations need to be taken into account when choosing the architecture of a system. What can be done on a microcontroller should probably be done on a microcontroller (an IR system, basic use of sensors, servos), and what requires a more powerful system (webserver with database, logins, file operations, cameras ...) should lead to using an ARM (in conjunction to a DSP for audio/video usually). It sums up to this rule of thumb:
+\textit{``There are hardware mistakes that no amount of software can patch''}.
+\\
+\\
+In my opinion, the best approach to a complex system consisting partly of real-time software is an hybrid ARM/PIC, with an I$^{2}$C bus for the communication. The distinction between the (possible) user-interface and the real-time part of the system would be made clear, and the only drawback I can really think of is that the real-time part would receive orders with a slight delay.
+Another, more Real-Time specific approach would be to use the PRU (Programmable Real-Time Unit) from the AM3359, but it is inevitably much more work than the hybrid solution.

@@ -1,0 +1,113 @@
+[General]
+img_extIsRegExp=false
+img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .jpeg .png
+kileprversion=1
+kileversion=1.9.3
+lastDocument=thesis.tex
+masterDocument=thesis.tex
+name=thesis
+pkg_extIsRegExp=false
+pkg_extensions=.cls .sty .dtx
+src_extIsRegExp=false
+src_extensions=.tex .ltx .bib .mp
+
+[Tools]
+MakeIndex=
+QuickBuild=
+
+[item:appendix_background.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:chapter_conclusions.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:chapter_example.tex]
+archive=true
+column=57
+encoding=ISO 8859-15
+highlight=LaTeX
+line=72
+open=true
+
+[item:chapter_introduction.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:gesammelte_werke.bib]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=BibTeX
+line=0
+open=false
+
+[item:lfbsdasa.sty]
+archive=true
+column=1
+encoding=ISO 8859-15
+highlight=LaTeX
+line=7
+open=false
+
+[item:my_appendices.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:my_chapters.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:my_config.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:my_includes.tex]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=LaTeX
+line=0
+open=true
+
+[item:thesis.kilepr]
+archive=true
+column=0
+encoding=ISO 8859-15
+highlight=
+line=0
+open=false
+
+[item:thesis.tex]
+archive=true
+column=53
+encoding=ISO 8859-15
+highlight=LaTeX
+line=42
+open=true
+

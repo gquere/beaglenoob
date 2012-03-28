@@ -1,0 +1,16 @@
+\BOOKMARK [0][-]{titel.0}{Titelseite}{}% 1
+\BOOKMARK [0][-]{toc.0}{Contents}{}% 2
+\BOOKMARK [0][-]{chapter.1}{1 Introduction}{}% 3
+\BOOKMARK [0][-]{chapter.2}{2 Basics}{}% 4
+\BOOKMARK [1][-]{section.2.1}{2.1 Analog to digital conversion}{chapter.2}% 5
+\BOOKMARK [1][-]{section.2.2}{2.2 General Purpose Input Output communication}{chapter.2}% 6
+\BOOKMARK [1][-]{section.2.3}{2.3 Communication protocols}{chapter.2}% 7
+\BOOKMARK [0][-]{chapter.3}{3 Realisations}{}% 8
+\BOOKMARK [1][-]{section.3.1}{3.1 Sensors: using the A/D conversion}{chapter.3}% 9
+\BOOKMARK [1][-]{section.3.2}{3.2 Communication: in and out}{chapter.3}% 10
+\BOOKMARK [1][-]{section.3.3}{3.3 Pulse-Width Modulation}{chapter.3}% 11
+\BOOKMARK [1][-]{section.3.4}{3.4 Timers / Interrupts}{chapter.3}% 12
+\BOOKMARK [1][-]{section.3.5}{3.5 Video feed over http}{chapter.3}% 13
+\BOOKMARK [1][-]{section.3.6}{3.6 Database and CGI scripts}{chapter.3}% 14
+\BOOKMARK [0][-]{chapter.4}{4 Conclusion: Linux on ARM vs other RISC architectures }{}% 15
+\BOOKMARK [0][-]{chapter*.8}{Bibliography}{}% 16

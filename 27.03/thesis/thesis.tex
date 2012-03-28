@@ -1,0 +1,99 @@
+% Vorlage fuer Studien- und Diplomarbeiten am Lehrstuhl fuer Betriebssysteme
+% basiert auf scrbook, Doku dazu im scrguide.pdf (texdoc scrguide  oder google)
+
+\documentclass[12pt,             % Schriftgroesse
+               a4paper,          % Papierformat
+               %liststotoc,      % (alt) Tabellen- und Abbildungsverzeichnis im Inhaltsverz.
+               listof=totoc,     % Tabellen- und Abbildungsverzeichnis im Inhaltsverz.
+               %idxtotoc,        % (alt) Index im Inhaltsverz. auffuehren
+               index=totoc,      % Index im Inhaltsverz. auffuehren
+               %bibtotoc,        % (alt) Literaturverzeichnis im Inhaltsverz. auffuehren
+               bibliography=totoc,% Literaturverzeichnis im Inhaltsverz. auffuehren
+               oneside,         % auskommentieren, wenn beidseitig gedruckt wird
+                                 % default ist 'twoside'
+               BCOR1cm,          % zusaetzlicher Bindungsrand
+               %english,ngerman   % TODO : Englisch als weitere Sprache, Deutsch als Hauptsprache
+               ngerman,english  % TODO : alternativ Deutsch als weitere und Englisch als Hauptsprache
+               ]{scrbook}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pakete einbinden (Reihenfolge ist z.T. wichtig!)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[latin1]{inputenc}   % Eingabezeichenkodierung, alternativ "ansinew"
+                                % (Windows only) oder "utf8" fuer Unicode
+\usepackage{cmap}               % Fuer schoene Ligaturen in PDFs
+\usepackage[T1]{fontenc}        % u.a. Umlaute als ein Zeichen in der PDF-Datei
+\usepackage{lmodern}            % Linux Modern Schriften auswaehlen
+\usepackage{graphicx}           % Um Bilder einzubinden (mit \includegraphics)
+\usepackage{makeidx}            % Falls ein Index erstellt werden soll, muessen
+\usepackage{subfigure}
+\usepackage{listings}
+\makeindex                      %  die beiden Zeilen aktiviert werden.
+                                %  zusaetzlich noch \printindex unten
+\usepackage{units}              % Einheiten setzen mit z.B. \unit[10]{MB} und \unitfrac[100]{Mbit}{s}
+%\usepackage{siunitx}           % Wesentlich umfangreicheres Einheiten Paket als Ersatz fuer "units"
+
+% In dieser Datei koennen eigene Erweiterungen eingebracht werden
+% HIER: Nur wenn noetig Datei my_includes.tex aendern
+%\input{my_includes.tex}         % Eigene Pakete und Definitionen laden
+
+% letztes:     ----------------------------------------------------------------------------------------------------
+\usepackage{lfbsdasa}           % LfBS-Vorlage fuer Diplom- und Studienarbeiten 
+                                %  mit Titelseite
+% dieses sollte immer als letztes eingebunden werden, da es hyperref mitbringt 
+% (welches wirklich das letzte ist)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hier beginnt das eigentliche Dokument
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%% Ein paar wichtige Details konfigurieren
+%%----------------------------------------
+% HIER: Details anpassen in my_config.tex
+\input{my_config.tex}               % TODO : bearbeite Einstellungen in my_config.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Der Vorspann (andere Seitennummerierung)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frontmatter
+\maketitle                %Titelseite ausgeben
+\phantomsection\pdfbookmark{\contentsname}{toc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Der Hauptteil ("normale" Seitennummerierung)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mainmatter
+% Hier werden die Kapitel eingebunden
+% TODO : weitere Kapitel in my_chapters.tex eintragen
+\input{my_chapters.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Der Anhang (andere Sektionsnummerierung)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\appendix
+% Hier werden die AnhÃ¤nge eingebunden
+% TODO : weitere Kapitel in my_appendices.tex eintragen
+%%\input{my_appendices.tex}
+
+\footnotesize{
+\begin{thebibliography}{50}
+\bibitem {bbgts} BeagleBone getting started guide: \url{http://beagleboard.org/static/beaglebone/a3/README.htm}
+\bibitem {bbsrm} BeagleBone SRM Datasheet:\url{http://beagleboard.org/static/beaglebone/a3/Docs/Hardware/BONE\_SRM.pdf}
+\bibitem{kgpio} Kernel documentation gpio.txt: \url{http://www.kernel.org/doc/Documentation/gpio.txt}
+\bibitem {agimg} Angström project, official demo image: \url{http://www.angstrom-distribution.org/demo/beaglebone/}
+\bibitem {amtrm} Texas Instruments, AM3359 TRM Datasheet: \url{http://www.ti.com/product/am3359}
+\bibitem {putty} Putty project homepage: \url{http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html}
+\end{thebibliography}}
+
+
+% evtl. Abkuerzungsverzeichnis (z.B. Paket nomenclature)
+
+%%\printindex                     % Wenn ein Index erstellt werden soll, muss
+                                %  diese Zeile aktiviert werden
+                                %  Zusaetzlich oben das Paket einbinden und \makeindex
+
+\end{document}
+
+
+

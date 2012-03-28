@@ -1,0 +1,44 @@
+\chapter{Introduction}
+
+The goal of this 150 hours project is to provide enthusiast beginners with sample codes and a guide depicting the major features of embedded Linux. It is assumed that the reader has a decent C knowledge and has used microcontrollers prior to the BeagleBone (such as PICs, AVRs ...).
+\\
+The BeagleBone is an all-in one development board, of reduced size (8.6 cm by 5.3 cm). It embeds a low-power variation of an ARM processor, the AM3359, bringing the BeagleBone entire consumption while idling at around 1\,W. The system used is the 14/02/2012 official demo from the beagle community \cite{agimg}. It comes with tools such as Node.js (a server-side JavaScript environment) and Cloud9 (a web IDE) to make development easy for beginners. Nonetheless, it is recommended to work via ssh simply because this interface is not 100\% reliable yet (it is currently in development). Putty\cite{putty} is a client terminal working on both Linux and Windows, for ssh, serial or even raw sessions.
+\\
+\\
+The must-reads are: \textit{Getting started with beaglebone} \cite{bbgts}, the \textit{BeagleBone SRM (System Reference Manual)} \cite{bbsrm} and the GPIO (General Purpose Input Output) documentation from the kernel \cite{kgpio}. Useful information can generally be found in the mailing lists archive, and it is recommended to read them to learn what others are doing for a typical problem. It is possible to get help from the community (Mailing list, IRC), but not before having read everything and tried by yourself.
+\\
+This work demonstrates the use of basic functionalities such as analog to digital conversion, pulse-width modulation, interrupts and mandatory/useful system calls. This guide has a very broad range to help with the design of embedded systems, and the code provided separately aims to give concrete examples depicting the functionalities of the board. Based on the examples provided, and because the BeagleBone allows for very quick development, it should be possible to build a robot controlled via a web interface in a mere 50\,hours, using servomotors, a webcam, a webserver and CGI scripts.
+%Each realisation has its examples: 
+%\\
+%A/D conversion: \verb!thermistor.c!
+%\\
+%GPIO communication:  \verb!demo_lcd.c!
+%\\
+%Pulse-Width Modulation:    \verb!starwars_bad.c! \& \verb!starwars_light.c!
+%\\
+%Timers/Interrupts:    \verb!ir.c!
+%\\
+%Video feed over http:     \verb!run.sh! \& \verb!convert.sh! \& \verb!thermistor.c!
+%\\
+%Web control/Database:   \verb!led.cgi! \& \verb!test.c/test.db!
+
+\begin{table*}
+\centering
+\begin{tabular}{|c|c|} \hline
+A/D conversion   				& \verb!thermistor.c! \\
+\hline
+GPIO communication   			& \verb!demo_lcd.c! \\
+\hline
+Pulse-Width Modulation   		& \verb!starwars_bad.c! \& \verb!starwars_light.c! \\
+\hline
+Timers/Interrupts   			& \verb!ir.c! \\
+\hline
+Video feed over http  			& \verb!run.sh! \& \verb!convert.sh! \& \verb!thermistor.c! \\
+\hline
+Web control/Database  			& \verb!led.cgi! \& \verb!test.c/test.db! \\
+\hline
+\end{tabular}
+\caption{Realisations}
+\label{tab:programs}
+\end{table*}
+

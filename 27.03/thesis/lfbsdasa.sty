@@ -1,0 +1,362 @@
+%%****************************************
+%%*                                      *
+%%* RWTH Aachen University               *
+%%* Lehrstuhl fuer Betriebssysteme       *
+%%*                                      *
+%%* (1. Version Rainer Finocchiaro)      *
+%%*                                      *
+%%****************************************
+%%
+%% LaTeX-Vorlage fuer Studien- und Diplomarbeiten
+%% 
+
+%% Changelog:
+%% RF 20091020: [Change] Ueberschrift des "Abstracts" auf Deutsch in "Kurzfassung" geaendert
+%%
+%% RF 20091020: [Bugfix] fehlende Leerzeichen am Ende der Userbefehle hinzugefuegt,
+%%                       so dass z.B. \printauthor statt \printauthor\ genutzt werden
+%%                       kann. \xspace sorgt dafuer, dass falls noetig ein Leerzeichen 
+%%                       am Ende eingefuegt wird. Habe alle Userbefehle getestet.
+%% 28.9.2011 GW [Change] laut SL soll die Titelseite stets deutsch sein, unabhängig vom Text der Arbeit.
+%%
+%%
+%% RF = Rainer Finocchiaro
+%% TF = Thomas Finocchiaro
+%% CC = Carsten Clauss
+%% BB = Boris Bierbaum
+%% GW = Georg Wassen
+
+
+% Package fuer Studien- und Diplomarbeiten am Lehrstuhl fuer Betriebssyteme
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{lfbsdasa}[2009/10/20 Vorlage fuer Diplom- und Studienarbeiten am LfBS]
+\RequirePackage{ifthen}
+\RequirePackage{caption}        % Erforderlich fuer non-floating figures und tables
+	\captionsetup[lstlisting]{rule=0} % Temporaerer Workaround fuer einen Bug im caption-Paket (Vers. 3.1j)
+\RequirePackage{graphicx}       % Logos auf der Titelseite benutzen
+\RequirePackage{babel}          % Trennung und Uebersetzung von generierten Inhalten
+\RequirePackage{xspace}         % Bedingte Leerzeichen am Wortende
+                                %  fallen z.B. weg, wenn Satzzeichen folgt.
+\RequirePackage{hyperref}       % Querverweise und Metadaten in der PDF-Datei
+                                % Sollte immer als letztes geladen werden!
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% User-Befehle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Details, die vom Anwender eingegeben werden sollen
+\renewcommand*{\author}[1]{}                    % Autor der Arbeit
+\newcommand*{\reporttype}[1]{}                  % Diplomarbeit/Studienarbeit/etc.
+\newcommand*{\titleEn}[1]{}                     % Englischer Titel
+\newcommand*{\titleDe}[1]{}                     % Deutscher Titel
+\newcommand*{\matnr}[1]{}                       % Matrikelnummer
+\newcommand{\addinstitute}[3]{}                 % Institute hinzufuegen
+                                                %  #1 Kuerzel fuer Referenz, z.B. lfbs
+                                                %  #2 Titel des Instituts, z.B. Chair for OS, RWTH Aachen University
+                                                %  #3 Referenzzeichen, z.B. (*) oder irgendein Symbol
+\newcommand*{\instituteref}[1]{}                % Gibt das oben definierte Symbol zum Kuerzel aus
+\newcommand{\addsupervisor}[1]{}                % Betreuer hinzufuegen (Optional Institutskuerzel)
+\newcommand{\addsecondreferee}[1]{}             % Zweitgutachter hinzufuegen (Optional Institutskuerzel)
+
+% Titelseite ausgeben
+\renewcommand{\maketitle}{}
+
+% Befehle, die die vom User angegebenen Details ausgeben (Praefix "print")
+\newcommand*{\printauthor}{}
+\newcommand*{\printreporttype}{}
+\newcommand*{\printtitleEn}{}
+\newcommand*{\printtitleDe}{}
+\newcommand*{\printmatnr}{}
+\newcommand{\printinstitutes}{}
+\newcommand{\printsupervisors}{}
+\newcommand{\printsecondreferees}{}
+\newcommand{\printversicherung}{}                % Versicherung der selbstaendigen Arbeit ausgeben
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Interna (Alle Makros mit "@" sind vom Anwender nicht benutzbar)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newboolean{@printinstitute}                         % Sollen die Institute der Betreuer ausgegeben werden
+\setboolean{@printinstitute}{false}                  %  (wird gesetzt, falls \institute definiert wird)
+\newboolean{@printsecondreferee}                     % Soll der Zweitgutachter ausgegeben werden
+\setboolean{@printsecondreferee}{false}              %  (wird gesetzt, falls \addsecondreferee benutzt wird
+
+\newlength{\@templength}
+\newlength{\@supervisorlength}                        % Laenge des laengsten Betreuernamens
+\newlength{\@supervisorlabellength}                   % Laenge des laengsten Betreuerlabels (Betreuer, Zweitgutachter etc.)
+\newlength{\@supervisornamelength}                    % Laenge des Betreuerlabels (z.B. Betreuer)
+\newlength{\@secondrefereenamelength}                 % Laenge des Zweitgutachterlabels (z.B. Zweitgutachter)
+
+% Ein paar sinnvolle(?) Aenderungen der Standardparameter fuer die Float-Platzierung
+% [http://groups.google.de/group/de.comp.text.tex/msg/e85b9d18d50b2be1]
+% [http://www.dante.de/faq/de-tex-faq/html/makros2.html#6]
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.5}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{1}
+\setcounter{totalnumber}{5}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\dbltopfraction}{0.85}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.8}
+\renewcommand{\dblfloatpagefraction}{0.8}
+
+\AtBeginDocument{
+	\hypersetup{%colorlinks=false,                      % links have no colors (meanwhile standard)
+	            %pdfstartpage={1},                      % open pdf at page xyz (meanwhile standard)
+	            pdfkeywords={},
+	            bookmarksnumbered=true,                 % Kapitelnummerierung in bookmarks
+	            %pdfprintscaling=None,                   % Default-Einstellung zum Drucken: nicht skaliert
+	            %pdfduplex=DuplexFlipLongEdge,           % Default-Druck-Einstellung: Duplex
+	            pdfcreator={pdfLaTeX},
+	            pdfproducer={LaTeX with hyperref},
+	            plainpages=false
+	}
+
+	% Ein paar Uebersetzungen hier zentral gesammelt
+    % 28.9.2011 GW : laut SL soll die Titelseite stets deutsch sein, unabhängig vom Text der Arbeit.
+	%\iflanguage{ngerman}
+	%	{ %true
+			\newcommand*{\matnrname}{Matrikelnummer}
+			\newcommand*{\titlepagename}{Titelseite}
+			\newcommand*{\supervisorname}{Betreuer}
+			\newcommand*{\secondrefereename}{Zweitgutachter}
+			\newcommand{\rwthlfbsname}{an der\\
+			                           Rheinisch-Westf\"alischen Technischen Hochschule Aachen\\
+			                           Fakult\"at f\"ur Elektrotechnik und Informationstechnik\\
+			                           Lehrstuhl f\"ur Betriebssysteme}
+			\newcommand{\versicherung}{Ich versichere hiermit, dass ich die vorliegende Arbeit
+			                           selbst\"andig und ohne Benutzung anderer als der
+			                           angegebenen Hilfsmittel angefertigt habe. Alle Stellen,
+			                           die w\"ortlich oder sinngem\"a\ss\ aus ver\"offentlichten und 
+			                           nicht ver\"offentlichten Schriften entnommen sind, sind
+			                           als solche kenntlich gemacht. Die Arbeit ist in gleicher
+			                           oder \"ahnlicher Form noch nicht als Pr\"ufungsarbeit
+			                           eingereicht worden.}
+			\newcommand{\aachendatename}{Aachen, den \today}
+			\newcommand{\printmaintitle}{\printtitleDe}
+%		}
+%		{} %false
+%	\iflanguage{english}
+%		{ %true
+%			\newcommand*{\matnrname}{Matriculation Number}
+%			\newcommand*{\titlepagename}{Title page}
+%			\newcommand*{\supervisorname}{Supervisor}
+%			\newcommand*{\secondrefereename}{Second Referee}
+%			\newcommand{\rwthlfbsname}{at the\\
+%			                           RWTH Aachen University\\
+%			                           Faculty of Electrical Engineering and Information Technology\\
+%			                           Chair for Operating Systems}
+%			\newcommand{\versicherung}{I hereby declare that I wrote this thesis myself without
+%			                           sources other than those indicated herein. All parts taken
+%			                           from published and unpublished scripts are indicated as
+%			                           such. The paper has not been previously presented as an 
+%			                           examination paper in any other form.}
+%			\newcommand{\aachendatename}{Aachen, \today}
+%			\newcommand{\printmaintitle}{\printtitleEn}
+%		}
+%		{} %false
+	% Ueberpruefen, ob eine unterstuetzte Sprache gewaehlt wurde
+	\iflanguage{ngerman}
+		{} %true
+		{\iflanguage{english}
+			{} %true
+			{\PackageError{lfbs_dasa}
+			              {Language \languagename not yet supported. Define translations in lfbsdasa.sty}
+			              {Please define translations for \languagename in lfbsdasa.sty}
+			} %false
+		} %false
+}
+
+%
+% Die Ausgabekommandos zur Usereingabe definieren (wird genau so aus- wie eingegeben)
+%
+\renewcommand*{\author}[1]{\renewcommand*{\printauthor}{#1\xspace}}
+\renewcommand*{\reporttype}[1]{\renewcommand*{\printreporttype}{#1\xspace}}
+\renewcommand*{\titleEn}[1]{\renewcommand*{\printtitleEn}{#1\xspace}}
+\renewcommand*{\titleDe}[1]{\renewcommand*{\printtitleDe}{#1\xspace}}
+\renewcommand*{\matnr}[1]{\renewcommand*{\printmatnr}{#1\xspace}}
+
+%
+% Institut hinzufuegen (falls mehrere Institute/Firmen involviert)
+%  #1 Kuerzel (zur Verwendung mit \instituteref)
+%  #2 Kompletter Name des Instituts
+%  #3 Symbol zur Kennzeichnung von Betreuer/Institut
+%
+\renewcommand{\printinstitutes}{}
+\newcommand{\instref}{}
+\renewcommand{\addinstitute}[3]{%
+	\expandafter\def\csname instref#1\endcsname{#3}%          % Definiere z.B. \instreflfbs als #3
+	\expandafter\def\csname instname#1\endcsname{#2}%         % Definiere z.B. \instnamelfbs als #2
+	% Neues Institut an "Tabelle" anhaengen
+	\protected@edef\printinstitutes{\printinstitutes#3 #2\\}% % \printinstitutes expandieren und mit Zusatz
+	                                                          %   wieder speichern
+	\setboolean{@printinstitute}{true}%                       % Wenn wir ein Inst. definiert haben, auch drucken
+}
+% Anwenderbefehl zum referenzieren des Instituts
+\renewcommand{\instituteref}[1]{                            % Definiere z.B. \instituteref{lfbs} als \instreflfbs
+	\expandafter\csname instref#1\endcsname
+}
+
+%
+% Betreuer hinzufuegen
+%
+\renewcommand{\printsupervisors}{}
+\renewcommand{\addsupervisor}[2][]
+{%
+	\expandafter\ifx\csname instref#1\endcsname\relax
+  	% \instrefxyz steht nicht zur Verfuegung
+  	\PackageError{lfbsdasa}%Paket
+  	             {Institute "#1" not defined. Institute must be defined before using a reference to it}%Kurztext
+  	             {Please define institute before using a reference to it.}%Langtext
+	\else
+		\settowidth{\@templength}{#2 \instituteref{#1}}
+		\ifthenelse{\@templength>\@supervisorlength}
+			{\setlength{\@supervisorlength}{\@templength}}%true
+			{}%false
+		% Neuen Betreuer an "Tabelle" anhaengen
+		\ifthenelse{\equal{\printsupervisors}{}}
+			{\g@addto@macro\printsupervisors{#2 \instituteref{#1}}}    %1. Eintrag
+			{\g@addto@macro\printsupervisors{\\ #2 \instituteref{#1}}} %Folgende Eintraege
+	\fi
+}
+
+%
+% Zweitgutachter hinzufuegen
+%
+\renewcommand{\printsecondreferees}{}
+\renewcommand{\addsecondreferee}[2][]
+{%
+	\expandafter\ifx\csname instref#1\endcsname\relax
+  	% \instrefxyz steht nicht zur Verfuegung
+  	\PackageError{lfbsdasa}%Paket
+  	             {Institute "#1" not defined. Institute must be defined before using a reference to it}%Kurztext
+  	             {Please define institute before using a reference to it.}%Langtext
+	\else
+		\settowidth{\@templength}{#2 \instituteref{#1}}
+		\ifthenelse{\@templength>\@supervisorlength}
+			{\setlength{\@supervisorlength}{\@templength}}%true
+			{}%false
+		% Neuen Zweitgutachter an "Tabelle" anhaengen
+		\ifthenelse{\equal{\printsecondreferees}{}}
+			{\g@addto@macro\printsecondreferees{#2 \instituteref{#1}}}    %1. Eintrag
+			{\g@addto@macro\printsecondreferees{\\ #2 \instituteref{#1}}} %Folgende Eintraege
+		\setboolean{@printsecondreferee}{true}
+	\fi
+}
+
+%
+% Versicherung ausgeben
+%
+\renewcommand{\printversicherung}{
+	\thispagestyle{empty}
+
+	\vspace*{\stretch{10}}
+	
+    \begin{otherlanguage}{ngerman}
+	\versicherung
+	\vspace{3cm}
+	
+	\aachendatename
+    \end{otherlanguage}
+	\vspace{\stretch{1}}
+}
+
+%
+% Titelseite ausgeben
+%
+\renewcommand{\maketitle}{
+	\hypersetup{%
+	            pdftitle={\printmaintitle},      % Titel, Autor und Subject in
+	            pdfsubject={\printreporttype},   %  PDF-Eigenschaften eintragen
+	            pdfauthor={\printauthor}
+	}%
+	% Label-Laenge auf die Laenge des laengeren Labels setzen, falls beide genutzt werden
+	\settowidth{\@supervisornamelength}{\supervisorname}
+	\settowidth{\@secondrefereenamelength}{\secondrefereename}
+	\ifthenelse{\boolean{@printsecondreferee}}
+		{\ifthenelse{\@supervisornamelength>\@secondrefereenamelength}
+			{\setlength{\@supervisorlabellength}{\@supervisornamelength}}%true
+			{\setlength{\@supervisorlabellength}{\@secondrefereenamelength}}%false
+		}%printsecondreferee=true
+		{
+			\setlength{\@supervisorlabellength}{\@supervisornamelength}%
+		}%printsecondreferee=false
+	\begin{titlepage}
+		\phantomsection\pdfbookmark{\titlepagename}{titel}
+		\begin{center}
+	  
+			\includegraphics[width=12.2cm]{logo/LfBS_LOGO_3c}
+
+			% Je nach Hauptsprache wird zuerst der englische oder der deutsche Titel in \LARGE gesetzt
+			%  Der weitere Titel wird dann in \Large etwas kleiner gesetzt
+			\vspace{\stretch{2}}
+
+            % 28.9.2011 GW : laut SL soll die Titelseite stets deutsch sein, unabhängig vom Text der Arbeit.
+			%\iflanguage{english}
+			%	{{\LARGE\bfseries\printtitleEn\par\vspace{1cm}}{\Large\bfseries\printtitleDe\par}}
+				{{\LARGE\bfseries\printtitleDe\par\vspace{1cm}}{\Large\bfseries\printtitleEn\par}}
+
+			\vspace{\stretch{1}}
+	    
+			\printauthor\\
+			\matnrname: \printmatnr\\
+			\vspace{1.5cm}
+			\textbf{\printreporttype}\\
+			\rwthlfbsname
+			\vspace{0.8cm} \\
+			\includegraphics[width=6.1cm]{logo/dez5___rwthlogo_eps_rwthlogo5_english_blau} \\ 
+			\vspace{2cm plus 0cm minus 1cm} %Langer Titel -> Abstand darf auf 1cm schrumpfen
+
+			\makebox[\@supervisorlabellength][l]{\supervisorname:} \hspace{1em}
+				\begin{minipage}[t]{\@supervisorlength}%
+					\printsupervisors
+				\end{minipage}
+
+			\medskip
+			\ifthenelse{\boolean{@printsecondreferee}}
+				{
+				\makebox[\@supervisorlabellength][l]{\secondrefereename:} \hspace{1em}
+					\begin{minipage}[t]{\@supervisorlength}
+						\printsecondreferees
+					\end{minipage}
+				}%true
+				{}%false
+
+			\vspace*{1cm}
+			
+			\ifthenelse{\boolean{@printinstitute}}
+				{
+					\printinstitutes
+				}%true
+				{}%false
+		\end{center}
+	\end{titlepage}
+}
+
+% Ergaenzung der Abstract-Umgebung (die in scrbook nicht definiert ist)
+\addto\captionsngerman{\renewcommand{\abstractname}{Kurzfassung}}
+\addto\captionsgerman{\renewcommand{\abstractname}{Kurzfassung}}
+\newenvironment{abstract}{\addchap*{\abstractname}}{}
+
+% Non-floating figure-Umgebung, die sich genau so verhaelt wie eine normale figure-Umgebung
+\newenvironment{nffigure}
+{\begin{center}%                Die center-Umgebung sorgt fuer den noetigen Abstand
+ \begin{minipage}{\linewidth}%  Die minipage-Umgebung sorgt dafuer, dass Grafik und Caption zusammenbleiben
+ \captionsetup{type=figure}%    Typ auf figure festlegen (beseitigt zudem noch eine Platzierungs-Warnung)
+}%begindef
+{\end{minipage}%                minipage wieder beenden
+ \end{center}%                  center wieder beenden
+}%enddef
+
+% Non-floating table-Umgebung, die sich genau so verhaelt wie eine normale table-Umgebung
+\newenvironment{nftable}
+{\begin{center}%                Die center-Umgebung sorgt fuer den noetigen Abstand
+ \begin{minipage}{\linewidth}%  Die minipage-Umgebung sorgt dafuer, dass Tabelle und Caption zusammenbleiben
+ \captionsetup{type=table}%     Typ auf table festlegen (beseitigt zudem noch eine Platzierungs-Warnung)
+}%begindef
+{\end{minipage}%                minipage wieder beenden
+ \end{center}%                  center wieder beenden
+}%enddef
+
+\endinput

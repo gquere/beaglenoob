@@ -1,0 +1,206 @@
+\chapter{Realisations}
+
+This chapter contains the realisations and for each thema there are a number of programs that depicts the functionnalities of the subject in question. The correspondance between thema and program was given in table~\ref{tab:1}.
+
+\section{Sensors: using the A/D conversion}
+
+The following sensors have been integrated:
+\begin{itemize}
+\item Light Dependant Resistor (LDR)
+\item Negative Temperature Coefficient (NTC) thermistor
+\item 3-way accelerometer
+\item IR distance sensor
+\end{itemize}
+
+The complexity of integrating such sensors is highly variable. For instance, a distance sensor has a basic linear output, therefore a simple multiplication will give the actual distance seen by the integrated sensor. This linear behaviour is inherently linked to the complexity of the sensor (it costs around 10 euros). On the other hand, the thermistor used here is a very simple sensor and consists of a material which resistance varies non-linearly with the temperature. This implies that the complexity is going to be found on the side of the receiving board: the voltage received has to be converted to a resistance, and then this resistance value will allow the calculation of the actual temperature.
+\\
+\\
+The law in question is called Steinhart and Hart's law, 
+
+\begin{math}
+1/T= A + B \cdot ln(R/Rt) + C \cdot ln(R/Rt)^{2} + D \cdot ln(R/Rt)^{3}
+\end{math}
+\\
+\\
+The coeffecients A to D are given in the datasheet. Note that here, for some reason, 
+the first 2 coefficients given in the datasheet (A1, B1) take the exponent specified in the head of the table whereas C1 and D1 take the unchanged coefficients as given in the cell.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=7cm]{pictures/ntcthermistor}
+\caption{R=f(T) for this NTC thermistor}
+\label{fig:ntcthermistor}
+\end{figure}
+
+Figuring out the equation and plotting it is purely essential: if it so happened that the resistor of the voltage divider was ill-calibrated (Vmax=1.8\,V), the board would surely get damaged.
+The precision given in the datasheet of the thermistor is 0.005°C in the [25;125°\,C] interval, but since the voltage fed to the thermistor is not 5\,V and that R1 in the voltage divider is not precisely 20k$\Omega$ (resistances are usually given with a $\pm$ 5\% precision), and that the thermistor has to be calibrated, the final precision is lowered considerably! But, using appropriate tools such as a digital voltmeter, it is possible to precisely measure R1, V$_{in}$ and calibrate the thermistor to achieve a <1\% error.
+\\
+\\
+The LDR results are barely exploitable, since the details to building the logartithmic curve are not given and the graph provided is of too poor quality for actual readings. To give an idea what a lux actually represents, consider the approximations given in table~\ref{tab:1}.
+
+\begin{table*}
+\centering
+\begin{tabular}{|c|c|c|c|} \hline
+\textbf{Lux}   & \textbf{Context} \\
+\hline
+0.001   & Night\\
+\hline
+0.1   & Emergency lightnings\\
+\hline
+50   & Poorly lit room\\
+\hline
+100   & Very cloudy day\\
+\hline
+1000  & Well lit room\\ 
+\hline
+10000  & Daylight\\ 
+\hline
+100000  & Direct sunlight\\ 
+\hline
+\end{tabular}
+\caption{Light in Lux in various situations}
+\label{tab:1}
+\end{table*}
+
+\section{Communication: in and out}
+
+On the cape built for purposes of demonstration, one can find 2 push buttons and an HD44780 LCD controller display. Both of these elements use the GPIO, one as an input and the other as an output.
+The HD44780 controller is a chip that makes it easy to communicate with an alphanumeric LCD display. Though these kits can easily being turned into serial peripherals, they originally are parallel devices that either operate in 4 or 8 bits mode for the data and 3 bits for the control. The actual minimum of GPIO pins to drive such a display kit is 6, because it is usually not useful to read from the device, and therefore one pin (R/W) can be directly shortened to ground if unneeded.
+\\
+\\
+The \verb!demo_lcd! program makes use of the \verb!lcd! library that depends itself from the \verb!gpio! library. The gpio library provides a set of C functions to initialize a pin, write to it, read from it. The lcd library includes the initialization of the screen, the timings and basic commands of the HD44780 controller. The protocol for the HD44780 as well as the usual wiring are recapitulated on figure figure~\ref{fig:pinoutHD44780} and table[XX]. Because the screen has been used on a transversal copper-plated PCB, the screen pins pan along pins not natively configured as gpio pins, thus the mux must be preconfigured for some pins (which default mode is a dedicated function) and not for some others (which default mode is a usable GPIO configuration).
+\\
+\\
+Because the files used to read/write from/to the gpio are not usual files, the classic \verb!libc fprintf(3)! function is not guaranteed to work in an unbuffered manner. This can be solved by closing the file each time it has been written to. The \verb!libc! function \verb!fflush(stdout)! can be used instead, but is probably not defined for special files either. The system calls \verb!open(2)! and \verb!write(2)! should solve the problem
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=2cm]{pictures/pinoutHD44780}
+\caption{Pinout for a usual HD44780 controller}
+\label{fig:pinoutHD44780}
+\end{figure}
+
+
+\section{Pulse-Width Modulation}
+
+The Pulse-Width Modulation is a technique in which short bursts of energy of variable length are fed to an electrical device at a rate sufficient for the load to see a uniform wave, thus allowing any type of wave (sine, constant ...),  to be approximated from a square wave with a fixed amplitude. Historically, it appeared to prevent the wasting of energy in resistors when the electric load was in 'idle' mode.
+\\
+\\
+PWM is traditionally used to control servomotors (1\,kHz), blinking LEDs at very precise frequencies (40\,kHz: carriers in the infrared terminology) or in audio amplifiers (100\,000\,Hz), but is now also used in fan control on recent motherboards (25\,kHz), in electric heating systems or stoves (<1\,Hz) and even in lamp dimmers (120\,Hz).
+\\
+The main characteristics are the switching frequency and the duty cycle. Whilst the former controls the form of the desired output wave as seen from the electrical load, the latter controls its actual amplitude by averaging it at a higher frequency.
+\\
+Here we use a buzzer to demonstrate two ways of playing a melody:
+\begin{itemize}
+\item with PWM emulation (GPIO)
+\item with real PWM
+\end{itemize}
+
+At the time this project was started, there was no support for PWM in the applied Linux kernel. Therefore, a GPIO bitbanging solution was implemented. It relies heavily on the \verb!nanosleep()! function. But of course, since we do not work in real-time, this method has terrible results! Because the output is a music played on a buzzer, it is not necessary to use an oscilloscope to detect that the result is floppy, as notes are out of tune. Nonetheless, the musical theme is easily recognized. A way to slightly improve this method is to use soft real-time scheduling privileges, by using the \verb!sched_setscheduler(2)! system call with the \verb!SCHED_FIFO! policy.
+\\
+\\
+However, with the newest kernel version (3.2.0+) it became possible to implement a real PWM control for the buzzer. The gpio.txt file, part of the kernel documentation, explains how it has to be set up. Because system clocks are disabled by default, the one relevant to the PWM output to use has to be enabled. But since this special register is not yet mapped in memory, the system call \verb!mmap(2)! has to be used on the portion of \verb!/dev/mem! which contains the system clocks registers. Also, by referring to the SRM of the BeagleBone, we can see that the PWM pin we intend to use necessitates that the MUX mode be set to 6. Once this is configured, the files in the virtual filesystem found under \verb!/sys/class/pwm/ehrpwm.X:Y/! can be used, namely \verb!period_freq(frequency in Hz)!, \verb!duty_percent! (0-100\%) and \verb!run! (0/1).
+
+\section{Timers / Interrupts}
+
+Though microcontrollers usually make an extensive use of timers, they're not actually used all that much on embedded Linux. Depending on the use and the precision needed, timestamps which count time from an arbitrary point in time are an acceptable solution. A real-time operating system probably provides better interfaces with timers.
+\\
+\\
+The timer pins from the GPIO can be a bit misleading, they actually are used to drive synchronous peripherals with an internal circuit. For instance, one could get rid of the quartz that drives a PIC microcontroller and connect the clock pins of the PIC directly to that of the BeagleBone.
+\\
+\\
+External interrupts are usable through the \verb!poll(2)! system call, which when specified a file descriptor will hang until an interrupt has been triggered. The path to specify here is that of the value file of the GPIO.
+The conditions under which an interrupt should be triggered are configurable in the gpio sysfs interface, namely in the \verb!edge! file. The options are \verb!none!, \verb!rising! (set trigger from low to high), \verb!falling! (set trigger from high to low) and \verb!both!, and the default is \verb!none!.
+\\
+\\
+The IR programs developed for this project demonstrate two possible ways to read an IR signal from basically any remote controller, record it and compare it to a list of signals:
+\begin{itemize}
+\item file polling with delays
+\item the use of GPIO interrupts (compare CPU usage, precision)
+\end{itemize}
+
+While both methods have proven to work to read, record and compare an IR signal, the precisions are an order of magnitude below. The worst case result of the first solutions was 6:8 which is an maximal error of 25\%. Nonetheless, with this solution the results usually have an error of less than 10\% which is sufficient for reading and comparing, although it would certainly be impossible to write the message back through another circuit.
+\\
+\\
+The second method uses interrupts and timestamps. If we base our reasoning on the hypothesys (inevitably wrong, but still) that the interrupts have about the same latency, then the max error is 0, or that of the timestamp. Here, we use the \verb!gettimeofday(2)!, which precision is the order of a microsecond. Since the IR switching frequencies are more in the milliseconds, our worst case has 10 times the resolution needed. In reality, the error induced by the interrupt handling is a little less than 2\% and the precision is 100 times better.
+
+Functions for timers:
+\verb!<time.h> <signals.h>!
+\verb!timer_create(2)!
+\verb!timer_settime(2)!
+\verb!timer_gettime(2)!
+
+\verb!setitimer(2)!
+\verb!getitimer(2)!
+
+\verb!<sys/timerfd.h>!
+\verb!timefd_create(2)!
+\verb!timerfd_settime(2)!
+\verb!timerfd_gettime(2)!
+
+\section{Video feed over http}
+
+Because the camera used for this project is a UVC (USB Video Device Class) camera, it worked straight out of the box with the image and \verb!mjpeg-streamer!. This package is able to grab JPEG pictures directly from the camera and stream them to a webserver. But because several instances of mjpeg-streamer can run, it is possible to grab a picture, save it and execute a script from one instance, and stream the modified pictures with a second instance.
+\\
+\begin{lstlisting}[language=bash, basicstyle=\scriptsize]
+run.sh:
+./mjpg_streamer -i "./input_uvc.so -d /dev/video0" 
+		-o "./output_file.so -f /tmp/pics/raw/ -d 15000 -c ./bla.sh" &
+./mjpg_streamer -i "./input_file.so -f /tmp/pics -r"
+		-o "./output_http.so -w www" &
+\end{lstlisting}
+
+To demonstrate a basic overlay, ImageMagick's convert function is used on the input jpeg, and the output jpeg is sent to the stream folder. Here we use a double overlay to make sure the text is visible on any colour. The problem here is that the creation of the overlay requires that the input jpeg be uncompressed, modified and recompressed, thus limiting the framerate to less than 2 fps with up to 10\% CPU consumption. By increasing the \verb!nice! value, it is possible to achieve 50\% more performance, with a CPU usage of 15\%.
+\\
+\\
+\begin{lstlisting}[language=sh, basicstyle=\scriptsize]
+convert.sh:
+
+#!/bin/sh
+dir="/tmp/pics/raw/"
+
+temp_k=`/home/root/code/thermistor`
+temp= echo "\$temp_k - 273.15" | bc
+nice -n -20 convert \$1 -gravity south \
+-font /usr/share/fonts/ttf/LiberationMono-Bold.ttf \
+-stroke '#000C' -strokewidth 2 -annotate 0 'Temperature : '\$temp \
+-stroke none -fill white     -annotate 0 'Temperature : '\$temp \
+/tmp/pics/test.jpg !
+rm \$dir*.jpg
+\end{lstlisting}
+
+If we want to build a system that take pictures, applies an overlay onto them and streams them back to monitor something, then the system should be able to reboot by itself in case it crashes. Therefore, we need to add entries to the init.d rules, with the daemon update-rc.d
+
+\section{Database and CGI scripts}
+
+It could be useful in the case of a production application to easily monitor the application from a remote location. In conjunction to a real webserver with PHP modules, a SQL relational database can be set up to store data. Programs in C (or for that matter, any language) can use a specific API to write to this database. A page in PHP can then integrate these values directly into the page sent to the user (in html after the conversion). It is also possible to control the system from the web, by using CGI (Common Gateway Interface) scripts. It is to note that these scripts can also be written in many languages, the most common ones being C and perl.
+\\
+\\
+Here, SQLite is used as an alternative to the classic MySQL for small databases. It is lightweight and its structure is much simpler. \verb!lightttpd! is a server with equivalent characteristics.
+Both packages can be intalled from \verb!opkg!: \verb!lightttpd! and \verb!sqlite3!.
+It is possible to create the database from the API, but it is something usually done from the command line interface. The basic commands are presented below:
+\\
+\\
+\begin{lstlisting}[language=bash, basicstyle=\scriptsize]
+sqlite3 test.db						# create and open test.db
+> CREATE TABLE test (id integer primary key, value text); # create a table inside the db
+> INSERT INTO "test" VALUES(1,'900;500;1400');		# insert a row
+\end{lstlisting}
+
+Another interesting possibility of webservers is the execution of CGI script, on the target. This allows a remote user to execute code on the server and possibly get a return value. It is possible to pass arguments to the CGI script using the \verb!POST/GET! methods. The CGI can be written in any language, but here we use perl to show the simplest example.
+
+The webserver chosen here is lighttpd, but Cherokee would have been an equally valid choice when it comes to lightweight, stripped-down, fast servers for embedded systems.
+
+It was installed using
+\\
+\\
+	\verb!opkg install lighttpd lighttpd_mod_cgi!
+\\
+\\
+To enable CGI scripts, simply edit \verb!/etc/lighttpd.conf!, and uncomment the 3 lines concerning CGI (\verb!mod_cgi! in \verb!server.modules!, and the CGI portion containing \verb!cgi.assign!)
+lighttpd creates a default \verb!index.html! file in \verb!/www!, where the server points. This file was modified to include buttons that turns a led on or off, using the \verb!led.cgi! script, written in perl. When the user clicks a button, it submits a form using the POST method to call a CGI script. The script can receive arguments and usually has to give HTML code back, thus implying the page changes. A way to circumvent this problem is to use the AJAX technologies.
+\\
+\\
+Though this was not implemented here, a central element to CGIs and databases is the PHP language. To put it in a nutshell, PHP allows the dynamic generation of webpages depending on the SQL database. Another very powerful technology to combine here is Javascript and the jQuery library to dynamically modify code inside a page from the client-side, and beneficiate from the callback of jQuery when invoking a script.
+Note on embedded systems: if maintaining a connection to the server is primordial, the options besides using long polling are very limited.
+
